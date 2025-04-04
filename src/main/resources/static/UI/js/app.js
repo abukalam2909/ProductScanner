@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function displayProductInfo(product) {
+    function displayProductInfo(response) {
         const resultContainer = document.getElementById('scanned-result');
-
-        if (product.error) {
+        console.log("Product ready to be displayed:", response);
+        if (response.error) {
             resultContainer.innerHTML = `
             <div class="error-message">
                 <h3>Error for Barcode: ${product.barcode}</h3>
@@ -57,9 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
             document.getElementById('retry-button').addEventListener('click', () => {
-                fetchProductInfo(product.barcode).then(displayProductInfo);
+                fetchProductInfo(response.data.barcode).then(displayProductInfo);
             });
         } else {
+            const product = response.data;
+            console.log("Name of the product :", product.name);
+            console.log("barcode of the product:", product.barcode);
             resultContainer.innerHTML = `
             <div class="product-info">
                 <h3>${product.name || 'Product Not Found'}</h3>
