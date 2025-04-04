@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.error) {
             resultContainer.innerHTML = `
             <div class="error-message">
-                <h3>Error for Barcode: ${product.barcode}</h3>
-                <p>${product.error}</p>
+                <h3>Error for Barcode: ${response.data.barcode}</h3>
+                <p>${response.error}</p>
                 <button id="retry-button">Try Again</button>
             </div>
         `;
@@ -72,9 +72,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${product.calories ? `<p>Calories: ${product.calories}</p>` : ''}
                     ${product.protein ? `<p>Protein: ${product.protein}g</p>` : ''}
                 </div>
-                <p class="scan-time">Scanned at: ${new Date().toLocaleString()}</p>
             </div>
         `;
+            resultContainer.innerHTML += `
+                <button id="scan-another" class="scan-button">Scan Another Item</button>
+            `;
+
+                    document.getElementById('scan-another').addEventListener('click', () => {
+                        resultContainer.innerHTML = '';
+                        scannerModal.style.display = 'block';
+                        startScanning();
+                    });
         }
     }
 
@@ -95,33 +103,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function detectBarcodes() {
+        if (!scanning) return; // Early exit if scanning was stopped
+
         try {
+            let barcode;
+
             // Try browser detection first
-            if (window.BarcodeDetector) {
+            if (window.BarcodeDetector && barcodeDetector) {
                 const barcodes = await barcodeDetector.detect(videoElement);
                 if (barcodes.length > 0) {
-                    return handleDetectedBarcode(barcodes[0].rawValue);
+                    barcode = barcodes[0].rawValue;
                 }
             }
 
-            // Fallback to backend decoding
-            const base64Image = await captureFrame();
-            const response = await fetch('/api/decode', {
-                method: 'POST',
-                body: JSON.stringify({ image: base64Image }),
-                headers: { 'Content-Type': 'application/json' }
-            });
+            // Fallback to backend decoding if needed
+            if (!barcode) {
+                const base64Image = await captureFrame();
+                const response = await fetch('/api/decode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Image })
+                });
 
-            if (!response.ok) throw new Error('Decoding failed');
-            const product = await response.json();
-            displayProductInfo(product);
+                if (!response.ok) throw new Error('Decoding failed');
+                const result = await response.json();
+                barcode = result.barcode; // Assuming API returns {barcode: "...", ...}
+            }
+
+            // Process the found barcode
+            if (barcode) {
+                await handleDetectedBarcode(barcode);
+                stopScanning();
+                scannerModal.style.display = 'none';
+                return; // Exit the detection loop
+            }
 
         } catch (error) {
             console.error('Detection error:', error);
-        } finally {
-            if (scanning) {
-                requestAnimationFrame(detectBarcodes);
-            }
+            // Consider showing error to user
+            resultElement.textContent = `Error: ${error.message}`;
+        }
+
+        // Continue scanning if still active
+        if (scanning) {
+            requestAnimationFrame(detectBarcodes);
         }
     }
 
@@ -159,6 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
             videoElement.srcObject.getTracks().forEach(track => track.stop());
             videoElement.srcObject = null;
         }
+        // Add transition effect
+        scannerModal.style.opacity = '0';
+        setTimeout(() => {
+            scannerModal.style.display = 'none';
+            scannerModal.style.opacity = '1';
+        }, 300);
     }
 
     // Event Listeners
