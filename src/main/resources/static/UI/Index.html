@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Barcode Scanner App</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+</head>
+<body>
+    <h1>Barcode Scanner</h1>
+    <button id="start-scan">Scan Barcode</button>
+    <div id="scanned-result"></div>
+
+    <div id="scanner-modal">
+        <div id="scanner-container">
+            <button id="close-scanner">✕ Close</button>
+            <h2>Barcode Scanner</h2>
+            <p>Position barcode within the frame</p>
+            <div class="video-container">
+                <video id="scanner-video" autoplay playsinline></video>
+                <div class="scanner-box"></div>
+            </div>
+            <div id="result">Scanning...</div>
+        </div>
+    </div>
+
+    <script src="./js/scanner.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>
