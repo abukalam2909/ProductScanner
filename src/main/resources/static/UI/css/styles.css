@@ -6,13 +6,14 @@ body {
 }
 
 button {
-    padding: 10px 15px;
     background: #4285f4;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    min-width: 120px;
 }
 
 button:hover {
@@ -59,8 +60,8 @@ button:hover {
 
 #scanner-video {
     width: 100%;
-    height: 100%;
-    border: 2px solid #ddd;
+    height: auto;
+    max-height: 60vh;
     object-fit: cover;
 }
 
@@ -93,5 +94,100 @@ button:hover {
     margin-top: 20px;
     padding: 15px;
     border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.product-history {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.product-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.current-scan {
+    border-left: 4px solid #34a853;
+    background-color: #f8fff9;
+}
+
+.history-item {
+    opacity: 0.9;
+    transform: scale(0.98);
+    border-left: 4px solid #fbbc05;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.product-header {
+    margin-bottom: 10px;
+}
+
+.product-header h3 {
+    margin: 0;
+    color: #202124;
+}
+
+.brand {
+    margin: 5px 0 0;
+    color: #5f6368;
+    font-size: 0.9rem;
+}
+
+.product-details {
+    margin: 10px 0;
+}
+
+.nutrition-facts {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    font-size: 0.8rem;
+}
+
+.scan-time {
+    color: #70757a;
+}
+
+.highlight-btn {
+    background: #38e20e;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.highlight-btn:hover {
+    background: #6de150;
+}
+
+.error-message {
+    padding: 15px;
+    margin: 10px 0;
+    background: #ffebee;
+    border-left: 4px solid #f44336;
     border-radius: 4px;
 }

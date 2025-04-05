@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,6 +43,27 @@ public class BarcodeController {
                             .body(ProductResponse.error("Product not found", barcode)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @RestController
+    @RequestMapping("/history")
+    public class ProductHistoryController {
+
+        private final List<Product> scannedProducts = new ArrayList<>(); // In-memory storage
+
+        @PostMapping
+        public ResponseEntity<List<Product>> addProduct(@RequestBody Product product) {
+            scannedProducts.add(product);
+            if (scannedProducts.size() > 4) {
+                scannedProducts.remove(0); // Keep only last 4 items
+            }
+            return ResponseEntity.ok(scannedProducts);
+        }
+
+        @GetMapping
+        public ResponseEntity<List<Product>> getHistory() {
+            return ResponseEntity.ok(scannedProducts);
         }
     }
 }

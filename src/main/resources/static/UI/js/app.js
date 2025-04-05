@@ -6,10 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoElement = document.getElementById('scanner-video');
     const resultElement = document.getElementById('result');
     const scannedResult = document.getElementById('scanned-result');
+    const productHistory = document.createElement('div'); // Create history container dynamically
+
+    // Initialize history container
+    productHistory.id = 'product-history';
+    productHistory.className = 'product-history';
+    document.body.insertBefore(productHistory, scannedResult.nextSibling);
 
     // State variables
     let scanning = false;
     let barcodeDetector = null;
+    const MAX_HISTORY_ITEMS = 4;
 
     // Helper Functions
     async function captureFrame() {
@@ -22,88 +29,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchProductInfo(barcode) {
         try {
-            console.log("Fetching product for barcode:", barcode); // Debug log
             const response = await fetch(`/api/products/${barcode}`);
-
-            console.log("API Response:", response); // Debug log
 
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Product not found');
             }
 
-            const product = await response.json();
-            console.log("Product Data:", product); // Debug log
-            return product;
-
+            return await response.json();
         } catch (error) {
             console.error('API Error:', error);
             return {
                 error: error.message,
-                barcode: barcode // Include barcode in error
+                barcode: barcode
             };
         }
     }
 
-    function displayProductInfo(response) {
-        const resultContainer = document.getElementById('scanned-result');
-        console.log("Product ready to be displayed:", response);
-        if (response.error) {
-            resultContainer.innerHTML = `
-            <div class="error-message">
-                <h3>Error for Barcode: ${response.data.barcode}</h3>
-                <p>${response.error}</p>
-                <button id="retry-button">Try Again</button>
-            </div>
-        `;
-            document.getElementById('retry-button').addEventListener('click', () => {
-                fetchProductInfo(response.data.barcode).then(displayProductInfo);
-            });
-        } else {
-            const product = response.data;
-            console.log("Name of the product :", product.name);
-            console.log("barcode of the product:", product.barcode);
-            resultContainer.innerHTML = `
-            <div class="product-info">
-                <h3>${product.name || 'Product Not Found'}</h3>
-                <h4>${product.brand}</h4>
-                <p><strong>Barcode:</strong> ${product.barcode}</p>
-                <div class="nutrition-facts">
-                    ${product.calories ? `<p>Calories: ${product.calories}</p>` : ''}
-                    ${product.protein ? `<p>Protein: ${product.protein}g</p>` : ''}
+    function createProductCard(product, isHistory = false) {
+        const scanTime = new Date().toLocaleString();
+        return `
+            <div class="product-card ${isHistory ? 'history-item' : 'current-scan'}">
+                <div class="product-header">
+                    <h3>${product.name || 'Unknown Product'}</h3>
+                    ${product.brand ? `<p class="brand">${product.brand}</p>` : ''}
+                </div>
+                <div class="product-details">
+                    <p><strong>Barcode:</strong> ${product.barcode}</p>
+                    <div class="nutrition-facts">
+                        ${product.calories ? `<p>Calories: ${product.calories}</p>` : ''}
+                        ${product.protein ? `<p>Protein: ${product.protein}g</p>` : ''}
+                    </div>
+                </div>
+                <div class="product-footer">
+                    <p class="scan-time">${scanTime}</p>
+                    ${isHistory ? `<button class="highlight-btn" data-barcode="${product.barcode}">Highlight</button>` : ''}
                 </div>
             </div>
         `;
-            resultContainer.innerHTML += `
+    }
+
+    function displayProductInfo(response) {
+        if (response.error) {
+            scannedResult.innerHTML = `
+                <div class="error-message">
+                    <h3>Error for Barcode: ${response.barcode}</h3>
+                    <p>${response.error}</p>
+                    <button id="retry-button">Try Again</button>
+                </div>
+            `;
+            document.getElementById('retry-button').addEventListener('click', () => {
+                fetchProductInfo(response.barcode).then(displayProductInfo);
+            });
+            return;
+        }
+
+        const product = response.data || response;
+
+        // Add to history (limit to MAX_HISTORY_ITEMS)
+        const historyItems = Array.from(productHistory.querySelectorAll('.history-item'));
+        if (historyItems.length >= MAX_HISTORY_ITEMS) {
+            productHistory.removeChild(historyItems[historyItems.length - 1]);
+        }
+        productHistory.insertAdjacentHTML('afterbegin', createProductCard(product, true));
+
+        // Display current product
+        scannedResult.innerHTML = createProductCard(product);
+        scannedResult.innerHTML += `
+            <button id="scan-another" class="scan-button">Scan Another Item</button>
+        `;
+
+        // Add event listeners
+        document.getElementById('scan-another').addEventListener('click', () => {
+            scannedResult.innerHTML = '';
+            scannerModal.style.display = 'block';
+            startScanning();
+        });
+
+        // Add highlight functionality for history items
+        document.querySelectorAll('.highlight-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const barcode = e.target.dataset.barcode;
+
+                //fetchProductInfo(barcode).then(displayProductInfo);
+                // Highlight selected product
+                scannedResult.innerHTML = createProductCard(product);
+                scannedResult.innerHTML += `
                 <button id="scan-another" class="scan-button">Scan Another Item</button>
             `;
-
-                    document.getElementById('scan-another').addEventListener('click', () => {
-                        resultContainer.innerHTML = '';
-                        scannerModal.style.display = 'block';
-                        startScanning();
-                    });
-        }
+            });
+        });
     }
 
     async function handleDetectedBarcode(barcode) {
         resultElement.innerHTML = `<strong>Detected:</strong> ${barcode}`;
-        scannedResult.innerHTML = `
-            <h3>Scanned Barcode:</h3>
-            <p>${barcode}</p>
-        `;
-
-        console.log("Handling barcode:", barcode);
         const product = await fetchProductInfo(barcode);
-        console.log("Received product:", product);
         displayProductInfo(product);
-
-        // Pause scanning for 3 seconds after detection
-        await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     async function detectBarcodes() {
-        if (!scanning) return; // Early exit if scanning was stopped
+        if (!scanning) return;
 
         try {
             let barcode;
@@ -116,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Fallback to backend decoding if needed
+            // Fallback to backend decoding
             if (!barcode) {
                 const base64Image = await captureFrame();
                 const response = await fetch('/api/decode', {
@@ -127,32 +152,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) throw new Error('Decoding failed');
                 const result = await response.json();
-                barcode = result.barcode; // Assuming API returns {barcode: "...", ...}
+                barcode = result.barcode;
             }
 
-            // Process the found barcode
             if (barcode) {
                 await handleDetectedBarcode(barcode);
                 stopScanning();
                 scannerModal.style.display = 'none';
-                return; // Exit the detection loop
+                return;
             }
 
         } catch (error) {
             console.error('Detection error:', error);
-            // Consider showing error to user
             resultElement.textContent = `Error: ${error.message}`;
         }
 
-        // Continue scanning if still active
         if (scanning) {
             requestAnimationFrame(detectBarcodes);
         }
     }
 
-    // Scanner Control Functions
     async function startScanning() {
         try {
+            // Check for mediaDevices support
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Camera API not supported in this browser");
+            }
+
             scanning = true;
             resultElement.textContent = "Scanning...";
 
@@ -163,18 +189,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Start camera stream
+            // Start camera stream with mobile-friendly constraints
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
             });
+
             videoElement.srcObject = stream;
+
+            // Ensure video plays on mobile
+            videoElement.playsInline = true;
+            videoElement.muted = true;
+            videoElement.play().catch(e => console.error("Video play error:", e));
 
             // Start detection loop
             detectBarcodes();
 
         } catch (error) {
-            console.error("Error starting scanner:", error);
-            resultElement.textContent = `Error: ${error.message}`;
+            console.error("Camera Error:", error);
+            resultElement.innerHTML = `
+            <div class="error-message">
+                <h3>Camera Access Error</h3>
+                <p>${error.message}</p>
+                ${error.name === 'NotAllowedError' ?
+                '<p>Please allow camera permissions in your browser settings</p>' : ''}
+                <button id="try-again">Try Again</button>
+            </div>
+        `;
+            document.getElementById('try-again').addEventListener('click', startScanning);
+            stopScanning();
         }
     }
 
@@ -184,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
             videoElement.srcObject.getTracks().forEach(track => track.stop());
             videoElement.srcObject = null;
         }
-        // Add transition effect
         scannerModal.style.opacity = '0';
         setTimeout(() => {
             scannerModal.style.display = 'none';
