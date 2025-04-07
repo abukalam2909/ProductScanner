@@ -3,6 +3,7 @@ package com.example.barcode_scanner.Controller;
 import com.example.barcode_scanner.Model.Product;
 import com.example.barcode_scanner.Model.ProductResponse;
 import com.example.barcode_scanner.Service.BarcodeService;
+import com.example.barcode_scanner.Service.HistoryService;
 import com.example.barcode_scanner.Service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class BarcodeController {
-    
+
     private final BarcodeService barcodeService;
     private final ProductService productService;
-    
+
     public BarcodeController(BarcodeService barcodeService, ProductService productService) {
         this.barcodeService = barcodeService;
         this.productService = productService;
@@ -45,25 +46,37 @@ public class BarcodeController {
             return ResponseEntity.badRequest().build();
         }
     }
+}
 
-    @RestController
-    @RequestMapping("/history")
-    public class ProductHistoryController {
+//seperate controller for /history
+@RestController
+@RequestMapping("/api/history")
+class ProductHistoryController {
 
-        private final List<Product> scannedProducts = new ArrayList<>(); // In-memory storage
+    private final HistoryService historyService;
+    private final List<Product> scannedProducts = new ArrayList<>();
 
-        @PostMapping
-        public ResponseEntity<List<Product>> addProduct(@RequestBody Product product) {
-            scannedProducts.add(product);
-            if (scannedProducts.size() > 4) {
-                scannedProducts.remove(0); // Keep only last 4 items
-            }
-            return ResponseEntity.ok(scannedProducts);
+    ProductHistoryController(HistoryService historyService) {
+        this.historyService = historyService;
+    }
+
+    @PostMapping
+    public ResponseEntity<List<Product>> addProduct(@RequestBody Product product) {
+        scannedProducts.add(product);
+        if (scannedProducts.size() > 4) {
+            scannedProducts.remove(0); // Keep only the last 4 items
         }
+        return ResponseEntity.ok(scannedProducts);
+    }
 
-        @GetMapping
-        public ResponseEntity<List<Product>> getHistory() {
-            return ResponseEntity.ok(scannedProducts);
-        }
+    @GetMapping
+    public ResponseEntity<List<Product>> getHistory() {
+        return ResponseEntity.ok(scannedProducts);
+    }
+
+    @GetMapping("/compare")
+    public ResponseEntity<Map<String, Product>> compareHistory(){
+        Map<String, Product> TopProducts = historyService.compare(scannedProducts);
+        return ResponseEntity.ok(TopProducts);
     }
 }

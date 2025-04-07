@@ -53,6 +53,11 @@
 			<artifactId>javase</artifactId>
 			<version>3.5.2</version> <!-- Or latest version -->
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20240303</version>
+		</dependency>
 
 	</dependencies>
 
