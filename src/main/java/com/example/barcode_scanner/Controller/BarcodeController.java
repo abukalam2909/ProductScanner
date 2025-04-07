@@ -79,4 +79,9 @@ class ProductHistoryController {
         Map<String, Product> TopProducts = historyService.compare(scannedProducts);
         return ResponseEntity.ok(TopProducts);
     }
+
+    @DeleteMapping("/clear")
+    public void clearHistory() {
+        scannedProducts.clear();
+    }
 }

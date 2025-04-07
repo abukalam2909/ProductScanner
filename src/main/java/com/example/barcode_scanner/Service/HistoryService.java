@@ -13,6 +13,12 @@ public class HistoryService {
         Product maxProtein = null;
         Product minSugar = null;
         Map<String, Product> TopProducts = new HashMap<>();
+        /* //more concise and declarative
+        Product maxProtein = scannedProducts.stream()
+                .filter(p -> p.getProtein() != null)
+                .max((a, b) -> Double.compare(a.getProtein(), b.getProtein()))
+                .orElse(null);
+         */
         for(Product product : scannedProducts) {
             if (maxProtein == null || product.getProtein() > maxProtein.getProtein()) {
                 maxProtein = product;

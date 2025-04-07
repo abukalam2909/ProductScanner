@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Sends the scanned product to the server history
     async function sendProductToHistory(product) {
         try {
             const response = await fetch('/api/history', {
@@ -54,8 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(product)
             });
             if (response.ok) {
-                const historyData = await response.json();
-                return historyData;
+                return await response.json();
             } else {
                 console.error('Failed to update history.');
             }
@@ -64,18 +62,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Loads product history from the server and attaches highlight listeners
     async function loadHistory() {
         try {
             const response = await fetch('/api/history');
             if (response.ok) {
                 const historyProducts = await response.json();
                 productHistoryContainer.innerHTML = '';
+
                 historyProducts.forEach(product => {
                     productHistoryContainer.insertAdjacentHTML('beforeend', createProductCard(product, true));
                 });
-                // Attach highlight button listeners after loading history
+
                 attachHighlightListeners();
+
+                const existingCompareButton = document.getElementById('compare-button');
+
+                if (historyProducts.length >= 2 && !existingCompareButton) {
+                    const compareButton = document.createElement('button');
+                    compareButton.id = 'compare-button';
+                    compareButton.className = 'scan-button';
+                    compareButton.textContent = 'Compare Products';
+                    compareButton.addEventListener('click', () => {
+                        window.location.href = 'compare.html';
+                    });
+                    document.body.insertBefore(compareButton, productHistoryContainer);
+                }
+
+                if (historyProducts.length < 2 && existingCompareButton) {
+                    existingCompareButton.remove();
+                }
+
             } else {
                 console.error('Failed to load history');
             }
@@ -84,19 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Attach event listeners to all highlight buttons in history
     function attachHighlightListeners() {
         const highlightButtons = productHistoryContainer.querySelectorAll('.highlight-btn');
         highlightButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const barcode = button.dataset.barcode;
-                // Call the highlight function to display details in the top block
                 highlightProduct(barcode);
             });
         });
     }
 
-    // Display the details of a product in the top block without re-posting it
     async function highlightProduct(barcode) {
         try {
             const response = await fetchProductInfo(barcode);
@@ -124,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Create a product card (used both for current scan and history)
     function createProductCard(product, isHistory = false) {
         const scanTime = new Date().toLocaleString();
         return `
@@ -149,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // Display product info after a successful scan
     async function displayProductInfo(response) {
         if (response.error) {
             scannedResult.innerHTML = `
@@ -167,12 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const product = response.data || response;
 
-        // Send the scanned product to the server history
         await sendProductToHistory(product);
-        // Reload history from the server
-        loadHistory();
+        await loadHistory();
 
-        // Display current product in the top block
         scannedResult.innerHTML = createProductCard(product);
         scannedResult.innerHTML += `
             <button id="scan-another" class="scan-button">Scan Another Item</button>
@@ -196,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let barcode;
 
-            // Try browser detection first
             if (window.BarcodeDetector && barcodeDetector) {
                 const barcodes = await barcodeDetector.detect(videoElement);
                 if (barcodes.length > 0) {
@@ -204,7 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Fallback to backend decoding
             if (!barcode) {
                 const base64Image = await captureFrame();
                 const response = await fetch('/api/decode', {
@@ -291,9 +297,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     }
 
-    startButton.addEventListener('click', () => {
-        scannerModal.style.display = 'block';
-        startScanning();
+    // Event Listeners
+    startButton.addEventListener('click', async () => {
+        try {
+            // Hit the DELETE endpoint to clear history
+            await fetch('/api/history/clear', { method: 'DELETE' });
+
+            // Manually clear UI
+            scannedResult.innerHTML = '';
+            productHistoryContainer.innerHTML = '';
+
+            // Start scanning
+            scannerModal.style.display = 'block';
+            startScanning();
+        } catch (error) {
+            console.error('Failed to clear history:', error);
+            alert('Could not clear history. Please try again.');
+        }
     });
 
     closeButton.addEventListener('click', () => {
