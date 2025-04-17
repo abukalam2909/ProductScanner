@@ -1,4 +1,4 @@
-package com.example.barcode_scanner.Service;
+package com.example.nutrition_analyser.Service;
 
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;

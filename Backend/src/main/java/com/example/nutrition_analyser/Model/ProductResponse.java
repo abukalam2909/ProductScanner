@@ -1,4 +1,4 @@
-package com.example.barcode_scanner.Model;
+package com.example.nutrition_analyser.Model;
 
 public class ProductResponse {
     private String status;

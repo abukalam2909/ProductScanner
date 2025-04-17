@@ -1,10 +1,10 @@
-package com.example.barcode_scanner;
+package com.example.nutrition_analyser;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BarcodeScannerApplicationTests {
+class NutritionAnalyserApplicationTests {
 
 	@Test
 	void contextLoads() {

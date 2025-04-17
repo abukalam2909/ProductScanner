@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nutrition-analyser-container
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nutrition-analyser-container
+  template:
+    metadata:
+      labels:
+        app: nutrition-analyser-container
+    spec:
+      containers:
+        - name: nutrition-analyser-container
+          image: abukalam/nutrition_analyser
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+          ports:
+            - containerPort: 8080

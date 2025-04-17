@@ -1,4 +1,4 @@
-package com.example.barcode_scanner.Config;
+package com.example.nutrition_analyser.Config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

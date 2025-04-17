@@ -1,6 +1,6 @@
-package com.example.barcode_scanner.Service;
+package com.example.nutrition_analyser.Service;
 
-import com.example.barcode_scanner.Model.Product;
+import com.example.nutrition_analyser.Model.Product;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

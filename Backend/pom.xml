@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>barcode_scanner</artifactId>
+	<artifactId>nutrition_analyser</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>barcode_scanner</name>
-	<description>Demo project for Spring Boot</description>
+	<name>nutrition_analyser</name>
+	<description>Analyser for Nutritional values of Food products</description>
 	<url/>
 	<licenses>
 		<license/>

@@ -1,10 +1,10 @@
-package com.example.barcode_scanner.Controller;
+package com.example.nutrition_analyser.Controller;
 
-import com.example.barcode_scanner.Model.Product;
-import com.example.barcode_scanner.Model.ProductResponse;
-import com.example.barcode_scanner.Service.BarcodeService;
-import com.example.barcode_scanner.Service.HistoryService;
-import com.example.barcode_scanner.Service.ProductService;
+import com.example.nutrition_analyser.Model.Product;
+import com.example.nutrition_analyser.Model.ProductResponse;
+import com.example.nutrition_analyser.Service.BarcodeService;
+import com.example.nutrition_analyser.Service.HistoryService;
+import com.example.nutrition_analyser.Service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
