@@ -1,3 +1,5 @@
+console.log("Loaded API_BASE_URL:", API_BASE_URL);
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const startButton = document.getElementById('start-scan');
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchProductInfo(barcode) {
         try {
-            const response = await fetch(`/api/products/${barcode}`);
+            const response = await fetch(`${API_BASE_URL}/api/products/${barcode}`);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Product not found');
@@ -47,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function sendProductToHistory(product) {
         try {
-            const response = await fetch('/api/history', {
+            const response = await fetch(`${API_BASE_URL}/api/history`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product)
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadHistory() {
         try {
-            const response = await fetch('/api/history');
+            const response = await fetch(`${API_BASE_URL}/api/history`);
             if (response.ok) {
                 const historyProducts = await response.json();
                 productHistoryContainer.innerHTML = '';
@@ -171,7 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             document.getElementById('retry-button').addEventListener('click', () => {
-                fetchProductInfo(response.barcode).then(displayProductInfo);
+                scannedResult.innerHTML = '';
+                scannerModal.style.display = 'block';
+                startScanning();
             });
             return;
         }
@@ -213,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!barcode) {
                 const base64Image = await captureFrame();
-                const response = await fetch('/api/decode', {
+                const response = await fetch(`${API_BASE_URL}/api/decode`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: base64Image })
@@ -276,10 +280,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3>Camera Access Error</h3>
                     <p>${error.message}</p>
                     ${error.name === 'NotAllowedError' ? '<p>Please allow camera permissions in your browser settings</p>' : ''}
-                    <button id="try-again">Try Again</button>
+                    <button id="retry-button">Try Again</button>
                 </div>
             `;
-            document.getElementById('try-again').addEventListener('click', startScanning);
+            document.getElementById('retry-button').addEventListener('click', () => {
+                scannedResult.innerHTML = '';
+                scannerModal.style.display = 'block';
+                startScanning();
+            });
             stopScanning();
         }
     }
@@ -301,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     startButton.addEventListener('click', async () => {
         try {
             // Hit the DELETE endpoint to clear history
-            await fetch('/api/history/clear', { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/api/history/clear`, { method: 'DELETE' });
 
             // Manually clear UI
             scannedResult.innerHTML = '';

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resultContainer = document.getElementById('comparison-results');
 
     try {
-        const response = await fetch('/api/history/compare');
+        const response = await fetch(`${API_BASE_URL}/api/history/compare`);
         if (!response.ok) throw new Error('Failed to fetch comparison');
 
         const data = await response.json();
