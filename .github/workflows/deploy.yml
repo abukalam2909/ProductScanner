@@ -12,7 +12,6 @@ jobs:
     env:
       AWS_REGION: us-east-1
       CLUSTER_NAME: barcode-cluster
-      SERVICE_NAME: nutrition-analyser-container-service
 
     steps:
       - name: Checkout Code
@@ -30,8 +29,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Set up Docker tag
-        id: vars
+      - name: Set Docker Tag
         run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up Java and Maven
@@ -40,44 +38,50 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Spring Boot Application
+      - name: Build Backends
         run: mvn clean package -DskipTests
         working-directory: ./Backend
 
-      - name: Build and Push Docker Image
+      - name: Build & Push Frontend Docker Image
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/barcode-frontend:${{ env.TAG }} ./Frontend-UI
+          docker push ${{ steps.login-ecr.outputs.registry }}/barcode-frontend:${{ env.TAG }}
+
+      - name: Build & Push Backend Docker Image
         run: |
           docker build -t ${{ steps.login-ecr.outputs.registry }}/barcode-backend:${{ env.TAG }} ./Backend
           docker push ${{ steps.login-ecr.outputs.registry }}/barcode-backend:${{ env.TAG }}
 
-      - name: Update K8s Manifest with New Image
+      - name: Patch Image Tags in K8s Files
         run: |
-          sed -i "s|image:.*|image: ${{ steps.login-ecr.outputs.registry }}/barcode-backend:${{ env.TAG }}|g" Backend/Kubernetes/Deployment.yaml
+          sed -i "s|IMAGE_TAG_UI_CONTAINER|${{ steps.login-ecr.outputs.registry }}/barcode-frontend:${{ env.TAG }}|g" Frontend-UI/Kubernetes/Deployment.yaml
+          sed -i "s|IMAGE_TAG_BACKEND_CONTAINER|${{ steps.login-ecr.outputs.registry }}/barcode-backend:${{ env.TAG }}|g" Backend/Kubernetes/Deployment.yaml
 
-      - name: Set up kubectl
+      - name: Configure kubectl
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      - name: Deploy to EKS
+      - name: Create TLS Secret
+        run: |
+          kubectl apply -f Frontend-UI/Kubernetes/tls-secret.yaml
+
+      - name: Deploy All Kubernetes Resources
         run: |
           kubectl apply -f Backend/Kubernetes/
+          kubectl apply -f Frontend-UI/Kubernetes/Deployment.yaml
+          kubectl apply -f Frontend-UI/Kubernetes/Service.yaml
+          kubectl apply -f Frontend-UI/Kubernetes/Ingress.yaml
+          
 
-      - name: Wait for LoadBalancer DNS
+      - name: Fetch Ingress Hostname
         run: |
           for i in {1..30}; do
-            DNS=$(kubectl get svc $SERVICE_NAME -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-            if [ "$DNS" != "" ]; then
-              echo "DNS found: $DNS"
-              echo "API_BASE_URL=$DNS" >> $GITHUB_ENV
+            INGRESS=$(kubectl get ingress barcode-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            if [ "$INGRESS" != "" ]; then
+              echo "Ingress Hostname: $INGRESS"
+              echo "FRONTEND_URL=https://$INGRESS" >> $GITHUB_ENV
               break
             fi
-            echo "Waiting for LoadBalancer DNS..."
+            echo "Waiting for ingress..."
             sleep 10
           done
-
-      - name: Patch config.js
-        run: |
-          echo "window._env_ = { API_BASE_URL: 'http://${{ env.API_BASE_URL }}' };" > Frontend-UI/js/config.js
-
-      - name: Sync Frontend to S3
-        run: |
-          aws s3 sync Frontend-UI/ s3://${{ secrets.S3_BUCKET }}/ --delete

@@ -23,11 +23,30 @@ variable "az2" {
 }
 
 # ----------------------
-# PROVIDER
+# PROVIDERS
 # ----------------------
 
 provider "aws" {
   region = var.aws_region
+}
+
+# Kubernetes provider for Helm access
+provider "kubernetes" {
+  host                   = aws_eks_cluster.eks_cluster.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.eks_cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = aws_eks_cluster.eks_cluster.endpoint
+    cluster_ca_certificate = base64decode(aws_eks_cluster.eks_cluster.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.cluster.token
+  }
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = aws_eks_cluster.eks_cluster.name
 }
 
 # ----------------------
@@ -84,7 +103,10 @@ resource "aws_subnet" "private1" {
   cidr_block              = "10.0.3.0/24"
   availability_zone       = var.az1
   map_public_ip_on_launch = false
-  tags = { Name = "private-subnet-1" }
+  tags = {
+    Name                              = "private-subnet-1"
+    "kubernetes.io/role/internal-elb" = "1"
+  }
 }
 
 resource "aws_subnet" "private2" {
@@ -92,7 +114,10 @@ resource "aws_subnet" "private2" {
   cidr_block              = "10.0.4.0/24"
   availability_zone       = var.az2
   map_public_ip_on_launch = false
-  tags = { Name = "private-subnet-2" }
+  tags = {
+    Name                              = "private-subnet-2"
+    "kubernetes.io/role/internal-elb" = "1"
+  }
 }
 
 resource "aws_route_table" "public" {
@@ -134,75 +159,7 @@ resource "aws_route_table_association" "private2" {
 }
 
 # ----------------------
-# S3 BUCKET FOR UI
-# ----------------------
-
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
-resource "aws_s3_bucket" "frontend" {
-  bucket = "barcode-ui-${random_id.suffix.hex}"
-  tags = { Name = "Frontend UI Bucket" }
-}
-
-resource "aws_s3_bucket_public_access_block" "frontend" {
-  bucket = aws_s3_bucket.frontend.id
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
-
-resource "aws_s3_bucket_policy" "frontend" {
-  bucket = aws_s3_bucket.frontend.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid       = "PublicReadGetObject",
-        Effect    = "Allow",
-        Principal = "*",
-        Action    = ["s3:GetObject"],
-        Resource  = "${aws_s3_bucket.frontend.arn}/*"
-      }
-    ]
-  })
-}
-
-resource "aws_s3_bucket_website_configuration" "frontend" {
-  bucket = aws_s3_bucket.frontend.id
-
-  index_document {
-    suffix = "Index.html"
-  }
-
-  error_document {
-    key = "Index.html"
-  }
-}
-
-# ----------------------
-# ECR REPOSITORY
-# ----------------------
-
-resource "aws_ecr_repository" "backend" {
-  name                 = var.ecr_repo_name
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-
-  tags = {
-    Name = "backend-ecr"
-  }
-}
-
-# ----------------------
-# EKS CLUSTER WITH EC2 NODES IN PRIVATE SUBNETS (ACROSS 2 AZs)
+# EKS CLUSTER + NODE GROUP
 # ----------------------
 
 resource "aws_eks_cluster" "eks_cluster" {
@@ -233,12 +190,47 @@ resource "aws_eks_node_group" "default" {
 }
 
 # ----------------------
-# OUTPUTS
+# NGINX INGRESS CONTROLLER
 # ----------------------
 
-output "s3_bucket_name" {
-  value = aws_s3_bucket.frontend.bucket
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress-controller"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "ingress-nginx"
+  create_namespace = true
+
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
+  }
+
+  set {
+    name  = "controller.publishService.enabled"
+    value = "true"
+  }
 }
+
+# ----------------------
+# ECR REPOSITORY
+# ----------------------
+
+resource "aws_ecr_repository" "backend" {
+  name                 = var.ecr_repo_name
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name = "backend-ecr"
+  }
+}
+
+# ----------------------
+# OUTPUTS
+# ----------------------
 
 output "ecr_repo_url" {
   value = aws_ecr_repository.backend.repository_url

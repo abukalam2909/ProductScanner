@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nutrition-analyser-container
-          image: 290182369109.dkr.ecr.us-east-1.amazonaws.com/barcode-backend:26174cd
+          image: 'IMAGE_TAG_BACKEND_CONTAINER'
           resources:
             limits:
               memory: "128Mi"
