@@ -64,7 +64,8 @@ jobs:
           done
 
       - name: Patch config.js
-        run: echo "window._env_ = { API_BASE_URL: '${{ env.API_BASE_URL }}' };" > Frontend-UI/js/config.js
+        run: |
+          echo "window._env_ = { API_BASE_URL: 'https://${{ env.API_BASE_URL }}' };" > Frontend-UI/js/config.js
 
       - name: Sync Frontend to S3
         run: |
