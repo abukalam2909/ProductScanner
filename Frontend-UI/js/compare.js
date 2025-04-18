@@ -1,3 +1,4 @@
+const API_BASE_URL = window._env_.API_BASE_URL;
 document.addEventListener('DOMContentLoaded', async () => {
     const resultContainer = document.getElementById('comparison-results');
 

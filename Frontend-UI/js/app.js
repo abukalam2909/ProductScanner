@@ -1,4 +1,4 @@
-console.log("Loaded API_BASE_URL:", API_BASE_URL);
+const API_BASE_URL = window._env_.API_BASE_URL;
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
