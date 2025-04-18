@@ -10,8 +10,12 @@ variable "cluster_name" {
   default = "barcode-cluster"
 }
 
-variable "ecr_repo_name" {
+variable "ecr_backend_repo_name" {
   default = "barcode-backend"
+}
+
+variable "ecr_frontend_repo_name" {
+  default = "barcode-frontend"
 }
 
 variable "az1" {
@@ -216,7 +220,7 @@ resource "helm_release" "nginx_ingress" {
 # ----------------------
 
 resource "aws_ecr_repository" "backend" {
-  name                 = var.ecr_repo_name
+  name                 = var.ecr_backend_repo_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -225,6 +229,19 @@ resource "aws_ecr_repository" "backend" {
 
   tags = {
     Name = "backend-ecr"
+  }
+}
+
+resource "aws_ecr_repository" "frontend" {
+  name                 = var.ecr_frontend_repo_name
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name = "frontend-ecr"
   }
 }
 
