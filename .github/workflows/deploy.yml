@@ -34,6 +34,16 @@ jobs:
         id: vars
         run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
+      - name: Set up Java and Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Spring Boot Application
+        run: mvn clean package -DskipTests
+        working-directory: ./Backend
+
       - name: Build and Push Docker Image
         run: |
           docker build -t ${{ steps.login-ecr.outputs.registry }}/barcode-backend:${{ env.TAG }} ./Backend
