@@ -215,17 +215,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (!barcode) {
-                const base64Image = await captureFrame();
-                const response = await fetch(`${API_BASE_URL}/api/decode`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64Image })
-                });
-                if (!response.ok) throw new Error('Decoding failed');
-                const result = await response.json();
-                barcode = result.barcode;
-            }
+            // if (!barcode) {
+            //     const base64Image = await captureFrame();
+            //     const response = await fetch(`${API_BASE_URL}/api/decode`, {
+            //         method: 'POST',
+            //         headers: { 'Content-Type': 'application/json' },
+            //         body: JSON.stringify({ image: base64Image })
+            //     });
+            //     if (!response.ok) throw new Error('Decoding failed');
+            //     const result = await response.json();
+            //     barcode = result.barcode;
+            // }
 
             if (barcode) {
                 await handleDetectedBarcode(barcode);
