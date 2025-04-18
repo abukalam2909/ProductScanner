@@ -26,7 +26,7 @@ public class BarcodeController {
     }
 
     @GetMapping("/products/{barcode}")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable String barcode) {
+    public ResponseEntity<?> getProduct(@PathVariable String barcode) {
         return ResponseEntity.ok(new Product("123", "Dummy", "Test", 100, 10.5, 2.5));
 //        return productService.findProduct(barcode)
 //                .map(product -> ResponseEntity.ok(ProductResponse.success(product)))
