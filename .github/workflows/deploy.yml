@@ -67,7 +67,7 @@ jobs:
             DNS=$(kubectl get svc $SERVICE_NAME -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             if [ "$DNS" != "" ]; then
               echo "DNS found: $DNS"
-              echo "API_BASE_URL=http://$DNS" >> $GITHUB_ENV
+              echo "API_BASE_URL=$DNS" >> $GITHUB_ENV
               break
             fi
             echo "Waiting for LoadBalancer DNS..."
@@ -76,7 +76,7 @@ jobs:
 
       - name: Patch config.js
         run: |
-          echo "window._env_ = { API_BASE_URL: 'https://${{ env.API_BASE_URL }}' };" > Frontend-UI/js/config.js
+          echo "window._env_ = { API_BASE_URL: 'http://${{ env.API_BASE_URL }}' };" > Frontend-UI/js/config.js
 
       - name: Sync Frontend to S3
         run: |
