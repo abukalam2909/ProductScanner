@@ -1,4 +1,3 @@
-// scanner.js
 class BarcodeScanner {
     constructor() {
         this.codeReader = new ZXing.BrowserMultiFormatReader();
@@ -25,27 +24,29 @@ class BarcodeScanner {
             await videoElement.play();
 
             // Start decoding
-            await this.codeReader.decodeFromVideoDevice(
-                null,
-                videoElement,
-                (result, err) => {
-                    if (result) {
-                        resultCallback(result.text);
-                        this.stopScanning();
+            const decodePromise = new Promise((resolve, reject) => {
+                this.codeReader.decodeFromVideoDevice(
+                    null,
+                    videoElement,
+                    (result, err) => {
+                        if (result) {
+                            resolve(result.text);
+                        }
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            reject(err);
+                        }
                     }
+                );
+            });
 
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error('Scanning error:', err);
-                        resultCallback(null, err);
-                    }
-                }
-            );
+            const barcode = await decodePromise;
+            resultCallback(barcode, null);
+            this.stopScanning();
 
-            console.log("Started scanning");
         } catch (error) {
-            console.error("Scanner initialization error:", error);
             this.stopScanning();
             resultCallback(null, error);
+            throw error; // Re-throw for outer catch block
         }
     }
 
@@ -57,10 +58,6 @@ class BarcodeScanner {
                 this.currentStream = null;
             }
             this.scanning = false;
-            console.log("Scanning stopped");
         }
     }
 }
-
-// Export an instance of the scanner
-const barcodeScanner = new BarcodeScanner();

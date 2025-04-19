@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize history container
     productHistoryContainer.id = 'product-history';
     productHistoryContainer.className = 'product-history';
-    document.body.insertBefore(productHistoryContainer, scannedResult.nextSibling);
+    scannedResult.parentNode.insertBefore(productHistoryContainer, scannedResult.nextSibling);
 
     // ========== Helper Functions ==========
 
@@ -192,47 +192,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("Camera API not supported in this browser");
             }
 
-            resultElement.textContent = "Scanning...";
+            scannerModal.classList.add('active');
+            resultElement.textContent = "Initializing scanner...";
+
             await scanner.startScanning(videoElement, async (barcode, error) => {
                 if (error) {
-                    console.error('Scanning error:', error);
-                    resultElement.innerHTML = `
-                        <div class="error-message">
-                            <h3>Scanning Error</h3>
-                            <p>${error.message}</p>
-                            <button id="retry-button" class="scan-button">Try Again</button>
-                        </div>
-                    `;
-                    document.getElementById('retry-button').addEventListener('click', () => {
-                        scanner.startScanning(videoElement, arguments.callee);
-                    });
+                    showScannerError(error);
                     return;
                 }
 
-                if (barcode) {
-                    resultElement.innerHTML = `<strong>Detected:</strong> ${barcode}`;
-                    const product = await fetchProductInfo(barcode);
-                    displayProductInfo(product);
-                    scannerModal.style.display = 'none';
-                }
+                resultElement.innerHTML = `<strong>Detected:</strong> ${barcode}`;
+                const product = await fetchProductInfo(barcode);
+                displayProductInfo(product);
+                scannerModal.classList.remove('active');
             });
+
         } catch (error) {
-            console.error("Camera Error:", error);
-            resultElement.innerHTML = `
-                <div class="error-message">
-                    <h3>Camera Access Error</h3>
-                    <p>${error.message}</p>
-                    ${error.name === 'NotAllowedError' ? '<p>Please allow camera permissions in your browser settings</p>' : ''}
-                    <button id="retry-button">Try Again</button>
-                </div>
-            `;
-            document.getElementById('retry-button').addEventListener('click', () => {
-                scannedResult.innerHTML = '';
-                scannerModal.style.display = 'block';
-                startScanning();
-            });
-            scanner.stopScanning();
+            showScannerError(error);
         }
+    }
+
+    function showScannerError(error) {
+        console.error("Scanner Error:", error);
+        resultElement.innerHTML = `
+        <div class="error-message">
+            <h3>${error.name === 'NotAllowedError' ? 'Permission Required' : 'Scanner Error'}</h3>
+            <p>${error.message}</p>
+            ${error.name === 'NotAllowedError' ?
+            '<p>Please allow camera permissions in your browser settings</p>' : ''}
+            <button id="retry-button" class="btn btn-primary">Try Again</button>
+        </div>
+    `;
+        document.getElementById('retry-button').addEventListener('click', startScanning, { once: true });
     }
 
     function stopScanning() {
@@ -261,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeButton.addEventListener('click', () => {
-        stopScanning();
+        scanner.stopScanning();
+        scannerModal.classList.remove('active');
     });
 
     window.addEventListener('beforeunload', stopScanning);
