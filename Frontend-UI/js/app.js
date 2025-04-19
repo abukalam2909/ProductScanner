@@ -69,15 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const existingCompareButton = document.getElementById('compare-button');
 
+                console.log("History Products:", historyProducts);
                 if (historyProducts.length >= 2 && !existingCompareButton) {
                     const compareButton = document.createElement('button');
                     compareButton.id = 'compare-button';
-                    compareButton.className = 'scan-button';
+                    compareButton.className = 'btn btn-primary';  // updated class for styling
                     compareButton.textContent = 'Compare Products';
                     compareButton.addEventListener('click', () => {
                         window.location.href = 'compare.html';
                     });
-                    document.body.insertBefore(compareButton, productHistoryContainer);
+
+                    productHistoryContainer.insertAdjacentElement('afterend', compareButton);
                 }
 
                 if (historyProducts.length < 2 && existingCompareButton) {
