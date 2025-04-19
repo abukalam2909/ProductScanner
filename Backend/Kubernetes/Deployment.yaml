@@ -16,11 +16,11 @@ spec:
         - name: nutrition-analyser-container
           image: 'IMAGE_TAG_BACKEND_CONTAINER'
           resources:
-            limits:
-              memory: "128Mi"
-              cpu: "100m"
             requests:
-              memory: "64Mi"
-              cpu: "100m"
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           ports:
             - containerPort: 8080
