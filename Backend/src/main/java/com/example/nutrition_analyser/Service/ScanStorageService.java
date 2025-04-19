@@ -14,7 +14,7 @@ import java.util.Map;
 public class ScanStorageService {
 
     private final DynamoDbClient dynamoDbClient;
-    private final String tableName = "barcode-scan-data";
+    private final String tableName = "product-scan-data";
 
     public ScanStorageService(DynamoDbClient dynamoDbClient) {
         this.dynamoDbClient = dynamoDbClient;
