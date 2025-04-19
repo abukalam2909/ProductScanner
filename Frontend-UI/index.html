@@ -1,43 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Barcode Scanner App</title>
-    <link rel="stylesheet" href="./css/styles.css">
+    <meta charset="UTF-8">
+    <title>Food Nutrition Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Scan food product barcodes to analyze nutritional content instantly">
+    <link rel="stylesheet" href="./css/styles.css" />
     <script src="https://unpkg.com/@zxing/library@latest"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <h1>Barcode Scanner</h1>
-    <button id="start-scan">Scan Barcode</button>
-    <div id="scanned-result"></div>
+<body class="scanner-page">
+<header class="scanner-header">
+    <h1>Food Nutrition Scanner</h1>
+    <p class="subtitle">Scan food product barcodes and analyze nutritional content instantly</p>
+</header>
 
-    <div id="scanner-modal">
-        <div id="scanner-container">
-            <button id="close-scanner">&#10005; Close</button>
-            <h2>Barcode Scanner</h2>
-            <p>Position barcode within the frame</p>
-            <div class="video-container">
-                <video id="scanner-video" autoplay playsinline></video>
-                <div class="scanner-box"></div>
-            </div>
-            <div id="result">Scanning...</div>
+<main class="scanner-main">
+    <section class="scanner-action">
+        <button id="start-scan" class="btn btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Start Barcode Scan
+        </button>
+        <div id="scanned-result" class="scanner-result fade-in"></div>
+    </section>
+
+    <section class="scanner-info">
+        <h2>Can't find a product?</h2>
+        <p>Submit a ticket for items not found in our database and we'll add them for you.</p>
+        <button id="open-upload" class="btn btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload Product Ticket
+        </button>
+    </section>
+</main>
+
+<div id="scanner-modal">
+    <div id="scanner-container" class="fade-in">
+        <button id="close-scanner" class="close-btn" aria-label="Close scanner">✕</button>
+        <h2>Scanning Barcode</h2>
+        <div class="video-container">
+            <video id="scanner-video" autoplay playsinline></video>
+            <div class="scanner-box"></div>
         </div>
+        <div id="result">Point your camera at a barcode</div>
     </div>
+</div>
 
-    <h2>Need to Upload Product Ticket?</h2>
-    <button id="open-upload" class="upload-button">Upload Ticket</button>
+<script>
+    document.getElementById('open-upload').addEventListener('click', () => {
+        window.location.href = 'upload.html';
+    });
+</script>
 
-    <script>
-        document.getElementById('open-upload').addEventListener('click', () => {
-            window.location.href = 'upload.html';
-        });
-    </script>
-
-    <script src="js/config.js"></script>
-    <script src="js/scanner.js"></script>
-    <script src="js/app.js?v=5"></script>
+<script src="js/config.js"></script>
+<script src="js/scanner.js"></script>
+<script src="js/app.js?v=6"></script>
 </body>
 </html>

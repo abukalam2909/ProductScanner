@@ -3,55 +3,85 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Upload Product Ticket</title>
+    <title>Upload Product Ticket | Food Nutrition Scanner</title>
+    <meta name="description" content="Submit product information for our database">
     <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="upload-page">
 <div class="upload-wrapper">
-    <div class="upload-card">
+    <div class="upload-card fade-in">
         <div class="icon-wrapper">
-            <!-- Inline SVG Icon -->
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                <path d="M4 6h16v2a2 2 0 100 4 2 2 0 100 4v2H4v-2a2 2 0 100-4 2 2 0 100-4V6z" stroke="#B5FFB0" stroke-width="2"/>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#B5FFB0" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
         </div>
         <h2>Upload Product Ticket</h2>
         <form id="upload-form" enctype="multipart/form-data">
             <div class="upload-zone">
-                <label for="barcode">Product Barcode:</label>
+                <label for="barcode">Product Barcode</label>
                 <input type="text" name="barcode" id="barcode" placeholder="Enter product barcode" required>
             </div>
+
             <div class="upload-zone">
-                <label for="barcodeImage">Barcode Image:</label>
-                <input type="file" accept="image/*" name="barcodeImage" capture="environment" required>
+                <label for="barcodeImage">Barcode Image</label>
+                <input type="file" accept="image/*" name="barcodeImage" id="barcodeImage" capture="environment" required>
             </div>
+
             <div class="upload-zone">
-                <label for="frontImage">Product Front Image:</label>
-                <input type="file" accept="image/*" name="frontImage" capture="environment" required>
+                <label for="frontImage">Product Front Image</label>
+                <input type="file" accept="image/*" name="frontImage" id="frontImage" capture="environment" required>
             </div>
-            <button type="submit" class="upload-submit-btn">Submit Ticket</button>
+
+            <button type="submit" class="upload-submit-btn">
+                Submit Ticket
+            </button>
+
             <div id="upload-status" class="status-text"></div>
         </form>
     </div>
 </div>
+
 <script src="js/config.js"></script>
 <script>
     const API_BASE_URL = window._env_.API_BASE_URL;
+
     document.getElementById('upload-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
         const status = document.getElementById('upload-status');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
         status.textContent = 'Uploading...';
+        submitBtn.disabled = true;
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/tickets/upload`, {
                 method: 'POST',
                 body: formData
             });
-            const result = await response.text();
-            status.textContent = response.ok ? '✅ Success: ' + result : '❌ Error: ' + result;
+
+            const result = await response.json();
+
+            if (response.ok) {
+                status.textContent = '✅ Success! We\'ll process your submission shortly.';
+                status.style.color = '#a5d6a7';
+                form.reset();
+            } else {
+                status.textContent = `❌ Error: ${result.message || 'Upload failed'}`;
+                status.style.color = '#ef9a9a';
+            }
         } catch (err) {
-            status.textContent = '❌ Failed: ' + err.message;
+            status.textContent = '❌ Network error. Please try again.';
+            status.style.color = '#ef9a9a';
+            console.error('Upload error:', err);
+        } finally {
+            submitBtn.disabled = false;
         }
     });
 </script>

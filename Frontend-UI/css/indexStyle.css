@@ -1,0 +1,151 @@
+
+/* General Reset and Theme */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #edf3ec, #d5e8dd);
+    color: #2c3e50;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Page Title */
+h1 {
+    font-size: 2.4rem;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: #2e5c4f;
+}
+
+/* Scanner Layout */
+#start-scan {
+    background-color: #3b855d;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 30px;
+    transition: background-color 0.3s ease;
+}
+
+#start-scan:hover {
+    background-color: #326f4e;
+}
+
+#scanned-result {
+    background: #ffffff;
+    padding: 20px;
+    width: 90%;
+    max-width: 720px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+#scanner-modal {
+    transition: opacity 0.3s ease;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+}
+
+#scanner-container {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    margin: 80px auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#scanner-container h2,
+#scanner-container p {
+    text-align: center;
+    color: #2e5c4f;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-top: 75%;
+    background: #000;
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#scanner-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanner-box {
+    position: absolute;
+    border: 4px dashed #3b855d;
+    width: 60%;
+    height: 30%;
+    top: 35%;
+    left: 20%;
+}
+
+#close-scanner {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#result {
+    margin-top: 20px;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    background: #e0f2f1;
+    border-radius: 8px;
+    color: #004d40;
+}
+
+/* Upload CTA Section */
+h2 {
+    font-size: 1.4rem;
+    margin: 30px 0 10px;
+    color: #2e5c4f;
+}
+
+.upload-button {
+    padding: 14px 24px;
+    font-size: 1rem;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+    background: #1b5e20;
+}
