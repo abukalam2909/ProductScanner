@@ -185,13 +185,13 @@ resource "aws_dynamodb_table" "scan_data" {
 # ----------------------
 # S3 BUCKET
 # ----------------------
-
-resource "random_id" "image_bucket_suffix" {
-  byte_length = 4
-}
+#
+# resource "random_id" "image_bucket_suffix" {
+#   byte_length = 4
+# }
 
 resource "aws_s3_bucket" "product_images" {
-  bucket        = "product-images-${random_id.image_bucket_suffix.hex}"
+  bucket        = "product-images-nutrition-analyser-29092001"
   force_destroy = true
   tags = {
     Name = "product-image-uploads"
@@ -206,6 +206,23 @@ resource "aws_s3_bucket_public_access_block" "image_block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+resource "aws_iam_policy" "s3_access_policy" {
+  name = "S3UploadPolicy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:PutObject",
+          "s3:GetObject"
+        ],
+        Resource = "${aws_s3_bucket.product_images.arn}/*"
+      }
+    ]
+  })
+}
+
 
 
 # ----------------------

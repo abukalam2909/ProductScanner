@@ -331,6 +331,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('beforeunload', stopScanning);
 
+    document.getElementById('upload-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+        const status = document.getElementById('upload-status');
+        status.innerText = "Uploading...";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.text();
+            status.innerText = response.ok ? "✅ Success: " + result : "❌ Error: " + result;
+        } catch (err) {
+            status.innerText = "❌ Failed to upload ticket: " + err.message;
+        }
+    });
+
+
     // Load history when the page loads
     loadHistory();
 });
