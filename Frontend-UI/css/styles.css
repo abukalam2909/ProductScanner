@@ -216,6 +216,7 @@ button:hover {
     background-attachment: fixed;
     color: #f0f0f0;
     margin: 0;
+    max-width: 100%;
     padding: 0;
     min-height: 100vh;
     display: flex;
@@ -226,18 +227,23 @@ button:hover {
 .upload-wrapper {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
-    padding: 20px;
+    height: 100vh; /* full screen height */
+    padding: 0;
+    box-sizing: border-box;
 }
+
 
 .upload-card {
     background: rgba(30, 60, 45, 0.9);
-    padding: 40px;
-    border-radius: 16px;
+    padding: 50px 60px;              /* Increased padding */
+    border-radius: 20px;
     width: 100%;
-    max-width: 500px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 640px;                /* Was 500px – now wider */
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 }
+
 
 .upload-card h2 {
     text-align: center;
@@ -261,15 +267,16 @@ button:hover {
     margin-bottom: 8px;
     font-weight: 600;
     color: #e8ffe4;
+    font-size: 1rem;
 }
 
 .upload-zone input[type="file"],
 .upload-zone input[type="text"] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: none;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.05rem;
     box-sizing: border-box;
     background: #f8f8f8;
     color: #222;
