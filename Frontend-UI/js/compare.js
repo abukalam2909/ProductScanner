@@ -1,60 +1,57 @@
 const API_BASE_URL = window._env_.API_BASE_URL;
 document.addEventListener('DOMContentLoaded', async () => {
-    const resultContainer = document.getElementById('comparison-results');
+    const maxProteinContent = document.getElementById('max-protein-content');
+    const minSugarContent = document.getElementById('min-sugar-content');
     const newScanBtn = document.getElementById('new-scan');
     const viewHistoryBtn = document.getElementById('view-history');
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/history/compare`);
-        if (!response.ok) throw new Error('Failed to fetch comparison');
+        if (!response.ok) throw new Error('Failed to fetch comparison data');
 
         const data = await response.json();
-        resultContainer.innerHTML = '';
 
+        // Clear previous content
+        maxProteinContent.innerHTML = '';
+        minSugarContent.innerHTML = '';
+
+        // Process comparison data
         Object.entries(data).forEach(([label, product]) => {
-            const isMaxProtein = label.includes('Max Protein');
-            const headerClass = isMaxProtein ? 'max-protein' : 'min-sugar';
-
-            const card = `
-                <div class="comparison-group">
-                    <div class="comparison-header ${headerClass}">
-                        ${label}
-                    </div>
-                    <div class="comparison-content">
-                        <div class="comparison-item">
-                            <h3>${product.name || 'Unknown Product'}</h3>
-                            <p class="brand">${product.brand || ''}</p>
-                            <p><strong>Barcode:</strong> ${product.barcode}</p>
+            const content = `
+                <div class="product-info">
+                    <h3>${product.name || 'Unknown Product'}</h3>
+                    <p class="brand">${product.brand || ''}</p>
+                    <p><strong>Barcode:</strong> ${product.barcode}</p>
+                    <div class="nutrition-grid">
+                        <div class="nutrition-item">
+                            <span class="nutrition-label">Calories</span>
+                            <span class="nutrition-value">${product.calories || 'N/A'}</span>
                         </div>
-                        <div class="comparison-nutrition">
-                            <div class="nutrition-value">
-                                <strong>Calories</strong>
-                                ${product.calories || 'N/A'}
-                            </div>
-                            <div class="nutrition-value">
-                                <strong>Protein</strong>
-                                ${product.protein ? product.protein + 'g' : 'N/A'}
-                            </div>
-                            <div class="nutrition-value">
-                                <strong>Sugar</strong>
-                                ${product.sugar ? product.sugar + 'g' : 'N/A'}
-                            </div>
+                        <div class="nutrition-item">
+                            <span class="nutrition-label">Protein</span>
+                            <span class="nutrition-value">${product.protein ? product.protein + 'g' : 'N/A'}</span>
+                        </div>
+                        <div class="nutrition-item">
+                            <span class="nutrition-label">Sugar</span>
+                            <span class="nutrition-value">${product.sugar ? product.sugar + 'g' : 'N/A'}</span>
                         </div>
                     </div>
                 </div>
             `;
-            resultContainer.insertAdjacentHTML('beforeend', card);
+
+            if (label.includes('Max Protein')) {
+                maxProteinContent.innerHTML = content;
+            } else if (label.includes('Min Sugar')) {
+                minSugarContent.innerHTML = content;
+            }
         });
 
     } catch (err) {
-        resultContainer.innerHTML = `
-            <div class="error-message">
-                <h3>Comparison Error</h3>
-                <p>${err.message}</p>
-                <button class="btn btn-primary" onclick="window.location.reload()">Try Again</button>
-            </div>
-        `;
-        console.error(err);
+        // Only show error in console, don't display to user
+        console.error('Comparison error:', err);
+        // Instead of showing error, show empty state
+        maxProteinContent.innerHTML = '<p class="empty-state">No protein data available</p>';
+        minSugarContent.innerHTML = '<p class="empty-state">No sugar data available</p>';
     }
 
     // Button event listeners

@@ -11,36 +11,42 @@
 </head>
 <body class="comparison-page">
 <div class="comparison-container">
-  <header class="scanner-header">
+  <header class="comparison-header">
     <h1>Nutrition Analysis</h1>
     <p class="subtitle">Compare nutritional information of scanned products</p>
   </header>
 
-  <main class="comparison-main">
-    <div class="comparison-sidebar left">
-      <div class="sidebar-card">
-        <h3>Analysis Tips</h3>
-        <ul>
-          <li>Look for higher protein options</li>
-          <li>Lower sugar is generally healthier</li>
-          <li>Balance calories with activity level</li>
-        </ul>
+  <div class="comparison-content">
+    <div class="tips-section">
+      <h2>Analysis Tips</h2>
+      <ul>
+        <li>Look for higher protein options</li>
+        <li>Lower sugar is generally healthier</li>
+        <li>Balance calories with activity level</li>
+      </ul>
+    </div>
+
+    <div class="comparison-blocks">
+      <div class="comparison-block max-protein">
+        <h2>Max Protein</h2>
+        <div id="max-protein-content" class="product-details"></div>
+      </div>
+
+      <div class="comparison-block min-sugar">
+        <h2>Min Sugar</h2>
+        <div id="min-sugar-content" class="product-details"></div>
       </div>
     </div>
 
-    <div id="comparison-results" class="fade-in"></div>
-
-    <div class="comparison-sidebar right">
-      <div class="sidebar-card">
-        <h3>Quick Actions</h3>
-        <button class="btn btn-secondary" id="new-scan">New Scan</button>
-        <button class="btn btn-outline" id="view-history">View History</button>
-      </div>
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <button class="btn btn-secondary" id="new-scan">New Scan</button>
+      <button class="btn btn-outline" id="view-history">View History</button>
     </div>
-  </main>
+  </div>
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/compare.js?v=4"></script>
+<script src="js/compare.js?v=5"></script>
 </body>
 </html>

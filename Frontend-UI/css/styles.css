@@ -465,131 +465,219 @@ body {
     padding: 2rem;
 }
 
-#comparison-results {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-/* ============ Enhanced Comparison Page ============ */
 .comparison-container {
-    max-width: 1400px;
+    max-width: 1000px;
     margin: 0 auto;
+}
+
+.comparison-header {
+    text-align: center;
     padding: 2rem;
-    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.comparison-main {
+.comparison-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(to right, #a8ff78, #78ffd6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.comparison-header .subtitle {
+    font-size: 1.1rem;
+    color: var(--lighter-text);
+}
+
+.comparison-content {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr;
     gap: 2rem;
-    align-items: start;
 }
 
-#comparison-results {
-    grid-column: 2;
-    display: grid;
-    gap: 2rem;
-    width: 100%;
-}
-
-.comparison-sidebar {
-    position: sticky;
-    top: 2rem;
-}
-
-.sidebar-card {
+.tips-section {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    align-self: start;
 }
 
-.sidebar-card h3 {
+.tips-section h2 {
     color: var(--lighter-text);
     margin-bottom: 1rem;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
 }
 
-.sidebar-card ul {
+.tips-section ul {
     padding-left: 1.2rem;
     color: var(--lighter-text);
     line-height: 1.8;
 }
 
-.comparison-group {
+.comparison-blocks {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.comparison-block {
     background: var(--card-bg);
     border-radius: 12px;
-    overflow: hidden;
+    padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.comparison-header {
-    padding: 1rem 1.5rem;
+.comparison-block h2 {
+    padding: 0.75rem 1rem;
     color: white;
     font-weight: 600;
+    border-radius: 6px;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
 }
 
-.comparison-header.max-protein {
-    background-color: #4CAF50; /* Green */
+.max-protein h2 {
+    background-color: var(--primary-color);
 }
 
-.comparison-header.min-sugar {
-    background-color: #2196F3; /* Blue */
+.min-sugar h2 {
+    background-color: var(--secondary-color);
 }
 
-.comparison-content {
-    padding: 1.5rem;
+.product-info h3 {
+    font-size: 1.25rem;
+    color: var(--dark-text);
+    margin-bottom: 0.25rem;
 }
 
-.comparison-item {
-    margin-bottom: 1.5rem;
+.brand {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
 }
 
-.comparison-item:last-child {
-    margin-bottom: 0;
-}
-
-.comparison-nutrition {
+.nutrition-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     margin-top: 1rem;
 }
 
-.nutrition-value {
-    text-align: center;
-    padding: 0.5rem;
-    border-radius: 6px;
+.nutrition-item {
     background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
 }
 
-.nutrition-value strong {
+.nutrition-label {
     display: block;
     font-size: 0.9rem;
     color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.nutrition-value {
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+.quick-actions {
+    grid-column: 1 / -1;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 1.5rem;
+}
+
+.quick-actions h2 {
+    color: var(--lighter-text);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.quick-actions .btn {
+    margin-right: 1rem;
 }
 
 /* Responsive adjustments */
-@media (max-width: 1024px) {
-    .comparison-main {
+@media (max-width: 768px) {
+    .comparison-content {
         grid-template-columns: 1fr;
     }
 
-    #comparison-results {
-        grid-column: 1;
+    .comparison-header {
+        padding: 1.5rem;
     }
 
-    .comparison-sidebar {
-        position: static;
+    .comparison-header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nutrition-grid {
+        grid-template-columns: 1fr;
     }
 
-    .sidebar-card {
+    .quick-actions .btn {
+        display: block;
+        width: 100%;
         margin-bottom: 1rem;
+        margin-right: 0;
     }
+}
+
+/* Product info text color */
+.product-info {
+    color: var(--dark-text); /* This will make text black/dark */
+}
+
+.product-info h3 {
+    color: var(--dark-text); /* Ensure headings are dark */
+}
+
+/* Nutrition items */
+.nutrition-item {
+    background: #f8f9fa;
+    color: var(--dark-text); /* Dark text for values */
+}
+
+/* Empty state styling */
+.empty-state {
+    color: var(--dark-text);
+    text-align: center;
+    padding: 1rem;
+    font-style: italic;
+}
+
+/* Remove error message styling if no longer needed */
+.error-message {
+    display: none;
+}
+
+/* Ensure all text in comparison blocks is dark */
+.comparison-block {
+    color: var(--dark-text);
+}
+
+.comparison-block h2 {
+    color: white !important; /* Only the header should be white */
+}
+
+/* Nutrition values */
+.nutrition-value {
+    color: var(--dark-text) !important;
+    font-weight: 600;
 }
 
 
