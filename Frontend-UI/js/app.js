@@ -10,25 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const scannedResult = document.getElementById('scanned-result');
     const productHistoryContainer = document.createElement('div');
 
+    // Initialize scanner
+    const scanner = new BarcodeScanner();
+
     // Initialize history container
     productHistoryContainer.id = 'product-history';
     productHistoryContainer.className = 'product-history';
     document.body.insertBefore(productHistoryContainer, scannedResult.nextSibling);
 
-    // State variables
-    let scanning = false;
-    let barcodeDetector = null;
-    const MAX_HISTORY_ITEMS = 4;
-
-    // Helper Functions
-
-    async function captureFrame() {
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        canvas.getContext('2d').drawImage(videoElement, 0, 0);
-        return canvas.toDataURL('image/jpeg');
-    }
+    // ========== Helper Functions ==========
 
     async function fetchProductInfo(barcode) {
         try {
@@ -196,83 +186,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function handleDetectedBarcode(barcode) {
-        resultElement.innerHTML = `<strong>Detected:</strong> ${barcode}`;
-        const product = await fetchProductInfo(barcode);
-        displayProductInfo(product);
-    }
-
-    async function detectBarcodes() {
-        if (!scanning) return;
-
-        try {
-            let barcode;
-
-            if (window.BarcodeDetector && barcodeDetector) {
-                const barcodes = await barcodeDetector.detect(videoElement);
-                if (barcodes.length > 0) {
-                    barcode = barcodes[0].rawValue;
-                }
-            }
-
-            // if (!barcode) {
-            //     const base64Image = await captureFrame();
-            //     const response = await fetch(`${API_BASE_URL}/api/decode`, {
-            //         method: 'POST',
-            //         headers: { 'Content-Type': 'application/json' },
-            //         body: JSON.stringify({ image: base64Image })
-            //     });
-            //     if (!response.ok) throw new Error('Decoding failed');
-            //     const result = await response.json();
-            //     barcode = result.barcode;
-            // }
-
-            if (barcode) {
-                await handleDetectedBarcode(barcode);
-                stopScanning();
-                scannerModal.style.display = 'none';
-                return;
-            }
-        } catch (error) {
-            console.error('Detection error:', error);
-            resultElement.textContent = `Error: ${error.message}`;
-        }
-
-        if (scanning) {
-            requestAnimationFrame(detectBarcodes);
-        }
-    }
-
     async function startScanning() {
         try {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("Camera API not supported in this browser");
             }
 
-            scanning = true;
             resultElement.textContent = "Scanning...";
+            await scanner.startScanning(videoElement, async (barcode, error) => {
+                if (error) {
+                    console.error('Scanning error:', error);
+                    resultElement.innerHTML = `
+                        <div class="error-message">
+                            <h3>Scanning Error</h3>
+                            <p>${error.message}</p>
+                            <button id="retry-button" class="scan-button">Try Again</button>
+                        </div>
+                    `;
+                    document.getElementById('retry-button').addEventListener('click', () => {
+                        scanner.startScanning(videoElement, arguments.callee);
+                    });
+                    return;
+                }
 
-            if ('BarcodeDetector' in window) {
-                barcodeDetector = new BarcodeDetector({
-                    formats: ['ean_13', 'upc_a', 'code_128']
-                });
-            }
-
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
-                audio: false
+                if (barcode) {
+                    resultElement.innerHTML = `<strong>Detected:</strong> ${barcode}`;
+                    const product = await fetchProductInfo(barcode);
+                    displayProductInfo(product);
+                    scannerModal.style.display = 'none';
+                }
             });
-
-            videoElement.srcObject = stream;
-            videoElement.playsInline = true;
-            videoElement.muted = true;
-            videoElement.play().catch(e => console.error("Video play error:", e));
-
-            detectBarcodes();
         } catch (error) {
             console.error("Camera Error:", error);
             resultElement.innerHTML = `
@@ -288,16 +231,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 scannerModal.style.display = 'block';
                 startScanning();
             });
-            stopScanning();
+            scanner.stopScanning();
         }
     }
 
     function stopScanning() {
-        scanning = false;
-        if (videoElement.srcObject) {
-            videoElement.srcObject.getTracks().forEach(track => track.stop());
-            videoElement.srcObject = null;
-        }
+        scanner.stopScanning();
         scannerModal.style.opacity = '0';
         setTimeout(() => {
             scannerModal.style.display = 'none';
@@ -308,14 +247,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     startButton.addEventListener('click', async () => {
         try {
-            // Hit the DELETE endpoint to clear history
             await fetch(`${API_BASE_URL}/api/history/clear`, { method: 'DELETE' });
 
-            // Manually clear UI
             scannedResult.innerHTML = '';
             productHistoryContainer.innerHTML = '';
 
-            // Start scanning
             scannerModal.style.display = 'block';
             startScanning();
         } catch (error) {
@@ -326,33 +262,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeButton.addEventListener('click', () => {
         stopScanning();
-        scannerModal.style.display = 'none';
     });
 
     window.addEventListener('beforeunload', stopScanning);
 
-    document.getElementById('upload-form').addEventListener('submit', async function (e) {
-        e.preventDefault();
+    // Upload form (optional)
+    const uploadForm = document.getElementById('upload-form');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        const form = e.target;
-        const formData = new FormData(form);
-        const status = document.getElementById('upload-status');
-        status.innerText = "Uploading...";
+            const formData = new FormData(uploadForm);
+            const status = document.getElementById('upload-status');
+            status.innerText = "Uploading...";
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/tickets/upload`, {
-                method: 'POST',
-                body: formData
-            });
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/tickets/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-            const result = await response.text();
-            status.innerText = response.ok ? "✅ Success: " + result : "❌ Error: " + result;
-        } catch (err) {
-            status.innerText = "❌ Failed to upload ticket: " + err.message;
-        }
-    });
+                const result = await response.text();
+                status.innerText = response.ok ? "✅ Success: " + result : "❌ Error: " + result;
+            } catch (err) {
+                status.innerText = "❌ Failed to upload ticket: " + err.message;
+            }
+        });
+    }
 
-
-    // Load history when the page loads
+    // Initial load
     loadHistory();
 });
