@@ -27,17 +27,17 @@
         </div>
     </div>
 
-    <h2>Upload Ticket</h2>
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="text" name="barcode" placeholder="Enter barcode" required><br><br>
-        Barcode Image: <input type="file" name="barcodeImage" accept="image/*" required><br><br>
-        Front Image: <input type="file" name="frontImage" accept="image/*" required><br><br>
-        <button type="submit">Upload Ticket</button>
-    </form>
-    <div id="upload-status"></div>
+    <h2>Need to Upload Product Ticket?</h2>
+    <button id="open-upload" class="upload-button">Upload Ticket</button>
+
+    <script>
+        document.getElementById('open-upload').addEventListener('click', () => {
+            window.location.href = 'upload.html';
+        });
+    </script>
 
     <script src="js/config.js"></script>
     <script src="js/scanner.js"></script>
-    <script src="js/app.js?v=4"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>

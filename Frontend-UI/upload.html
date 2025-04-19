@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Product Ticket</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="upload-page">
+<div class="upload-container">
+    <h2>Upload Product Ticket</h2>
+    <form id="upload-form" enctype="multipart/form-data">
+        <div class="upload-zone">
+            <label>Barcode Image:</label>
+            <input type="file" accept="image/*" name="barcodeImage" capture="environment" required>
+        </div>
+        <div class="upload-zone">
+            <label>Product Front Image:</label>
+            <input type="file" accept="image/*" name="frontImage" capture="environment" required>
+        </div>
+        <button type="submit" class="upload-submit-btn">Submit Ticket</button>
+        <div id="upload-status" class="status-text"></div>
+    </form>
+</div>
+
+<script src="js/config.js"></script>
+<script>
+    const API_BASE_URL = window._env_.API_BASE_URL;
+
+    document.getElementById('upload-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const status = document.getElementById('upload-status');
+        status.textContent = 'Uploading...';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.text();
+            status.textContent = response.ok ? '✅ Success: ' + result : '❌ Error: ' + result;
+        } catch (err) {
+            status.textContent = '❌ Failed: ' + err.message;
+        }
+    });
+</script>
+</body>
+</html>

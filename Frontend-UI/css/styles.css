@@ -191,3 +191,81 @@ button:hover {
     border-left: 4px solid #f44336;
     border-radius: 4px;
 }
+
+.upload-button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background: #10a37f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.upload-button:hover {
+    background: #0e866b;
+}
+
+.upload-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.upload-container {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 500px;
+}
+
+.upload-container h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.upload-zone {
+    margin-bottom: 20px;
+}
+
+.upload-zone label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.upload-zone input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.upload-submit-btn {
+    width: 100%;
+    background: #10a37f;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.upload-submit-btn:hover {
+    background: #0e866b;
+}
+
+.status-text {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #333;
+    text-align: center;
+}
+
