@@ -472,6 +472,126 @@ body {
     max-width: 1200px;
     margin: 0 auto;
 }
+/* ============ Enhanced Comparison Page ============ */
+.comparison-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+}
+
+.comparison-main {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+#comparison-results {
+    grid-column: 2;
+    display: grid;
+    gap: 2rem;
+    width: 100%;
+}
+
+.comparison-sidebar {
+    position: sticky;
+    top: 2rem;
+}
+
+.sidebar-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-card h3 {
+    color: var(--lighter-text);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.sidebar-card ul {
+    padding-left: 1.2rem;
+    color: var(--lighter-text);
+    line-height: 1.8;
+}
+
+.comparison-group {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-header {
+    padding: 1rem 1.5rem;
+    color: white;
+    font-weight: 600;
+}
+
+.comparison-header.max-protein {
+    background-color: #4CAF50; /* Green */
+}
+
+.comparison-header.min-sugar {
+    background-color: #2196F3; /* Blue */
+}
+
+.comparison-content {
+    padding: 1.5rem;
+}
+
+.comparison-item {
+    margin-bottom: 1.5rem;
+}
+
+.comparison-item:last-child {
+    margin-bottom: 0;
+}
+
+.comparison-nutrition {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.nutrition-value {
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: #f8f9fa;
+}
+
+.nutrition-value strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .comparison-main {
+        grid-template-columns: 1fr;
+    }
+
+    #comparison-results {
+        grid-column: 1;
+    }
+
+    .comparison-sidebar {
+        position: static;
+    }
+
+    .sidebar-card {
+        margin-bottom: 1rem;
+    }
+}
+
 
 /* ============ Responsive Adjustments ============ */
 @media (max-width: 768px) {
