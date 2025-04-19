@@ -206,27 +206,29 @@ button:hover {
     background: #0e866b;
 }
 
+/* ============ Upload Ticket Page ============ */
 .upload-page {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fa;
     display: flex;
-    align-items: center;
     justify-content: center;
-    background: #f3f4f6;
-    height: 100vh;
-    font-family: 'Segoe UI', sans-serif;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .upload-container {
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 90%;
-    max-width: 500px;
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 480px;
 }
 
 .upload-container h2 {
     margin-bottom: 20px;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+    color: #333;
     text-align: center;
 }
 
@@ -237,35 +239,42 @@ button:hover {
 .upload-zone label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 600;
+    font-weight: bold;
+    color: #444;
 }
 
-.upload-zone input[type="file"] {
+.upload-zone input[type="file"],
+.upload-zone input[type="text"] {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
 }
 
 .upload-submit-btn {
     width: 100%;
-    background: #10a37f;
-    color: white;
     padding: 12px;
+    font-size: 1rem;
+    background-color: #2e7d32;
+    color: white;
     border: none;
     border-radius: 6px;
-    font-size: 1rem;
     cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 
 .upload-submit-btn:hover {
-    background: #0e866b;
+    background-color: #1b5e20;
 }
 
 .status-text {
     margin-top: 15px;
-    font-size: 0.9rem;
-    color: #333;
+    font-weight: bold;
+    color: #444;
     text-align: center;
 }
+
 

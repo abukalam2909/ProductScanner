@@ -10,14 +10,22 @@
 <div class="upload-container">
     <h2>Upload Product Ticket</h2>
     <form id="upload-form" enctype="multipart/form-data">
+
         <div class="upload-zone">
-            <label>Barcode Image:</label>
+            <label for="barcode">Product Barcode:</label>
+            <input type="text" name="barcode" id="barcode" placeholder="Enter product barcode" required>
+        </div>
+
+        <div class="upload-zone">
+            <label for="barcodeImage">Barcode Image:</label>
             <input type="file" accept="image/*" name="barcodeImage" capture="environment" required>
         </div>
+
         <div class="upload-zone">
-            <label>Product Front Image:</label>
+            <label for="frontImage">Product Front Image:</label>
             <input type="file" accept="image/*" name="frontImage" capture="environment" required>
         </div>
+
         <button type="submit" class="upload-submit-btn">Submit Ticket</button>
         <div id="upload-status" class="status-text"></div>
     </form>
