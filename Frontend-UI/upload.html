@@ -66,21 +66,22 @@
                 body: formData
             });
 
-            const result = await response.json();
+            const result = await response.text();
 
             if (response.ok) {
                 status.textContent = '✅ Success! We\'ll process your submission shortly.';
                 status.style.color = '#a5d6a7';
                 form.reset();
             } else {
-                status.textContent = `❌ Error: ${result.message || 'Upload failed'}`;
+                status.textContent = `❌ Error: ${result}`;
                 status.style.color = '#ef9a9a';
             }
         } catch (err) {
             status.textContent = '❌ Network error. Please try again.';
             status.style.color = '#ef9a9a';
             console.error('Upload error:', err);
-        } finally {
+        }
+        finally {
             submitBtn.disabled = false;
         }
     });
