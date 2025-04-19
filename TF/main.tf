@@ -163,6 +163,52 @@ resource "aws_route_table_association" "private2" {
 }
 
 # ----------------------
+# DYNAMO DB
+# ----------------------
+
+resource "aws_dynamodb_table" "scan_data" {
+  name         = "product-scan-data"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "barcode"
+
+  attribute {
+    name = "barcode"
+    type = "S"
+  }
+
+  tags = {
+    Name        = "product-scan-data"
+    Environment = "dev"
+  }
+}
+
+# ----------------------
+# S3 BUCKET
+# ----------------------
+
+resource "random_id" "image_bucket_suffix" {
+  byte_length = 4
+}
+
+resource "aws_s3_bucket" "product_images" {
+  bucket        = "product-images-${random_id.image_bucket_suffix.hex}"
+  force_destroy = true
+  tags = {
+    Name = "product-image-uploads"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "image_block" {
+  bucket = aws_s3_bucket.product_images.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
+# ----------------------
 # EKS CLUSTER + NODE GROUP
 # ----------------------
 
