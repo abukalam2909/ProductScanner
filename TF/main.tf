@@ -34,7 +34,10 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Kubernetes provider for Helm access
+data "aws_eks_cluster_auth" "cluster" {
+  name = aws_eks_cluster.eks_cluster.name
+}
+
 provider "kubernetes" {
   host                   = aws_eks_cluster.eks_cluster.endpoint
   cluster_ca_certificate = base64decode(aws_eks_cluster.eks_cluster.certificate_authority[0].data)
@@ -47,10 +50,6 @@ provider "helm" {
     cluster_ca_certificate = base64decode(aws_eks_cluster.eks_cluster.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.cluster.token
   }
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = aws_eks_cluster.eks_cluster.name
 }
 
 # ----------------------
@@ -232,11 +231,11 @@ resource "aws_iam_policy" "s3_access_policy" {
 resource "aws_eks_cluster" "eks_cluster" {
   name     = var.cluster_name
   role_arn = "arn:aws:iam::290182369109:role/LabRole"
-
   vpc_config {
-    subnet_ids             = [aws_subnet.private1.id, aws_subnet.private2.id]
+    subnet_ids = [aws_subnet.private1.id, aws_subnet.private2.id]
     endpoint_public_access = true
   }
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
 resource "aws_eks_node_group" "default" {
@@ -244,13 +243,11 @@ resource "aws_eks_node_group" "default" {
   node_group_name = "default-node-group"
   node_role_arn   = "arn:aws:iam::290182369109:role/LabRole"
   subnet_ids      = [aws_subnet.private1.id, aws_subnet.private2.id]
-
   scaling_config {
     desired_size = 2
     max_size     = 2
     min_size     = 1
   }
-
   instance_types = ["t3.medium"]
   ami_type       = "AL2_x86_64"
   disk_size      = 20
@@ -260,6 +257,10 @@ resource "aws_eks_node_group" "default" {
 # NGINX INGRESS CONTROLLER
 # ----------------------
 
+resource "null_resource" "wait_for_eks" {
+  depends_on = [aws_eks_node_group.default]
+}
+
 resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress-controller"
   repository = "https://kubernetes.github.io/ingress-nginx"
@@ -267,13 +268,53 @@ resource "helm_release" "nginx_ingress" {
   namespace  = "ingress-nginx"
   create_namespace = true
 
+  depends_on = [null_resource.wait_for_eks]
+
   set {
     name  = "controller.service.type"
     value = "LoadBalancer"
   }
-
   set {
     name  = "controller.publishService.enabled"
+    value = "true"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "application_logs" {
+  name              = "/eks/barcode-app"
+  retention_in_days = 7
+  tags = {
+    Environment = "dev"
+    Name        = "barcode-log-group"
+  }
+}
+
+resource "helm_release" "fluentbit" {
+  name       = "fluent-bit"
+  repository = "https://fluent.github.io/helm-charts"
+  chart      = "fluent-bit"
+  namespace  = "kube-system"
+
+  depends_on = [null_resource.wait_for_eks]
+
+  set {
+    name  = "cloudWatch.enabled"
+    value = "true"
+  }
+  set {
+    name  = "cloudWatch.region"
+    value = "us-east-1"
+  }
+  set {
+    name  = "cloudWatch.logGroupName"
+    value = "/eks/barcode-app"
+  }
+  set {
+    name  = "cloudWatch.logStreamPrefix"
+    value = "app"
+  }
+  set {
+    name  = "cloudWatch.autoCreateGroup"
     value = "true"
   }
 }
@@ -306,6 +347,20 @@ resource "aws_ecr_repository" "frontend" {
   tags = {
     Name = "frontend-ecr"
   }
+}
+
+# ----------------------
+# SNS TOPIC FOR TICKET UPLOAD NOTIFICATIONS
+# ----------------------
+
+resource "aws_sns_topic" "ticket_upload_notifications" {
+  name = "ticket-upload-notifications"
+}
+
+resource "aws_sns_topic_subscription" "admin_email" {
+  topic_arn = aws_sns_topic.ticket_upload_notifications.arn
+  protocol  = "email"
+  endpoint  = "abukalam2909@gmail.com"
 }
 
 # ----------------------
