@@ -1,111 +1,112 @@
-# YouTube Analytics Studio
-
-A GenAI-powered content intelligence platform that goes beyond traditional YouTube metrics. Instead of simply analyzing views or likes, this serverless application offers deep insight into viewer sentiment, preferences, and behavioral patterns using a hybrid AI+LLM approach.
+# NutriSnap – A Cloud-Native Food Nutrition Scanner
+---
 
 ## 🚀 Overview
 
-This project was developed as part of the **Advanced Cloud Architecting** course at **Dalhousie University**, and built with real-world, production-grade AWS architecture in mind. It leverages **Claude 3 Sonnet via Amazon Bedrock** and **Amazon Comprehend** to analyze YouTube video comments, captions, and metadata for powerful content strategy insights.
-
-## 🧠 What It Does
-
-Drop a YouTube Channel ID and the system will:
-
-* Fetch video metadata, tags, titles, likes, views, captions, and comments.
-* Store structured data in DynamoDB, and raw JSON in Amazon S3.
-* Run sentiment and topic extraction using **Amazon Comprehend**.
-* Perform GenAI-powered viewer insight generation via **Claude 3 Sonnet**.
-* Return a dashboard-ready JSON response highlighting:
-
-  * Viewer sentiment distribution
-  * Content engagement insights
-  * Publishing time patterns
-  * AI-generated suggestions
-
-## 🛠️ Architecture Highlights
-
-* **Serverless Microservices on AWS**
-
-  * Amazon API Gateway
-  * AWS Lambda (multiple functions for ingest, NLP, LLM)
-  * Amazon DynamoDB (structured metadata)
-  * Amazon S3 (raw and processed data)
-  * Amazon Comprehend (sentiment and topic extraction)
-  * Amazon Bedrock (Claude 3 Sonnet for GenAI analysis)
-  * Amazon SNS (alerting on resource over-usage)
-  * Amazon CloudWatch (monitoring and logging)
-* **Networking & Security**
-
-  * VPC with private and public subnets
-  * All compute in **private subnets** behind **NAT Gateway**
-  * IAM roles with least privilege principle
-  * No public access to processing units
-* **IaC:** All infrastructure provisioned via **Terraform**
-
-## 📊 Monitoring & Alerts
-
-* Lambda, Bedrock, and Comprehend invocations monitored via **CloudWatch**
-* Alarms set on invocation thresholds and execution errors
-* **Amazon SNS** sends email notifications to admin on threshold breaches
-
-## 🧪 Prompt Engineering
-
-The Claude 3 LLM prompt was custom-designed to:
-
-* Understand viewer intent through selective comment sampling
-* Prioritize recent and high-sentiment interactions
-* Generate insights like:
-
-  * Content suggestions
-  * Preferred tone or video length
-  * Identifying disengagement signals
-* Filter spam-like or bot-generated comments heuristically
-
-## 🔐 AWS Well-Architected Framework Alignment
-
-* **Security**: Private subnets, IAM least privilege, no public compute
-* **Reliability**: Retry logic in Lambda, regional services, NAT HA
-* **Performance Efficiency**: Event-driven compute, no idle infra
-* **Cost Optimization**: Fully serverless, auto-scaling
-* **Operational Excellence**: Terraform for reproducibility, CloudWatch metrics
-* **Sustainability**: Minimized always-on resources, minimal footprint
-
-## 📈 Future Scope
-
-* Comment vector embeddings via OpenSearch
-* Viewer retention prediction using ML
-* Creator-specific prompt tuning
-* Engagement lifecycle visualization
-* Multi-language sentiment expansion (e.g., Tamil)
-
-## 📂 Repository Structure
-
-```
-.
-├── Lambda/
-│   ├── lambda_youtube_ingest.py
-│   ├── lambda_nlp_sentiment_analysis.py
-│   ├── lambda_fetch_results.py
-│   └── lambda_llm_insight.py
-├── Terraform/
-│   ├── vpc.tf
-│   ├── lambda.tf
-│   ├── dynamodb.tf
-│   ├── s3.tf
-│   ├── iam.tf
-│   └── api_gateway.tf
-├── assets/
-│   └── architecture_diagram.png
-├── README.md
-```
-
-## Acknowledgements
-
-Special thanks to **Professor Lu Yang** and **TA Shrey Monka** for their constant guidance and support.
-
-## 📬 Connect
-
-I'm open to feedback, collaborations, or discussions on GenAI x Cloud Engineering. DM or reach out if you're interested in the GitHub repo, architectural breakdown, or contributing ideas.
+NutriSnap is a cloud-native food barcode scanner web application that enables users to scan product barcodes, fetch nutritional data, compare multiple products, and raise tickets for missing product information. Built using a microservice architecture, the application leverages AWS-managed infrastructure, secure networking, and observability for a scalable and production-grade deployment.
 
 ---
 
-**#GenAI #Claude3 #AmazonBedrock #YouTubeAnalytics #AWS #Serverless #RAG #AIEngineering #Comprehend #Terraform #StudentProjects #DalhousieUniversity #CloudComputing #Innovation #OpenToCollaboration**
+## 🧠 Key Features
+
+- 📸 Scan barcodes using device camera (ZXing)
+- 📊 View and compare nutrition data of scanned products
+- 🧾 Raise a support ticket for unrecognized items with image upload
+- 🔐 HTTPS-based secure access using self-signed TLS via NGINX Ingress
+- 🧠 Cloud-native infrastructure with cost-effective design and full observability
+
+---
+
+## 🏗️ Architecture Summary
+
+### Frontend
+- Built with: HTML, CSS, JavaScript (modular)
+- Hosted on: EKS (private subnet) served via NGINX on Alpine
+- Access: Exposed via Ingress Controller with TLS (HTTPS)
+
+### Backend
+- Built with: Spring Boot (Java)
+- RESTful APIs for barcode lookup, history, and ticket system
+- Stateless microservice deployed as a pod in EKS (private subnet)
+
+### Infrastructure
+
+| Layer        | Service/Tool Used                              |
+|--------------|------------------------------------------------|
+| Compute      | Amazon EKS with EC2 worker nodes               |
+| Networking   | Custom VPC, Public/Private Subnets, NAT GW     |
+| Storage      | Amazon DynamoDB (scan data) <br> Amazon S3 (ticket uploads) |
+| Ingress      | NGINX Ingress Controller (public subnet)       |
+| Observability| Fluent Bit → CloudWatch Logs                   |
+| Messaging    | Amazon SNS (email alerts for new tickets)      |
+| IaC          | Terraform (modular configuration)              |
+
+### Ingress Strategy
+- HTTPS via NGINX Ingress (TLS from self-signed cert)
+- No ALB used due to ACM restriction in AWS Academy Learner Lab
+
+---
+
+## 🔐 Security Considerations
+
+- Private subnets for application pods (backend/frontend)
+- NGINX Ingress in public subnet only routes to internal services
+- Self-signed TLS certificate for encrypted communication
+- IAM role restrictions in Academy Lab explained; alternatives proposed
+- CloudWatch Logs for tracking and alerting
+- SNS notifications to email for user ticket events
+
+---
+
+## 📦 State Management Note
+
+Current architecture uses shared state in backend (Java `List<Product>`), which leads to leakage across sessions. Future versions will introduce:
+- JWT-based user identity
+- Per-user scan history stored in DynamoDB
+- Stateless REST APIs with secure scoped access
+
+---
+
+## 🧾 Raise Ticket Feature
+
+- User uploads 2 images (barcode & product front) for unrecognized products
+- Images stored in S3 with secure access
+- SNS email alert sent to admin
+- Future: Label-based ML model for product classification
+
+---
+
+## 💸 Cost Optimization
+
+| Resource           | Pricing Strategy              |
+|--------------------|-------------------------------|
+| EKS                | EC2 nodes on t3.medium        |
+| CloudWatch         | Log retention: 7 days         |
+| S3                 | Pay-per-use, small object size|
+| DynamoDB           | On-demand billing mode        |
+| SNS                | Free tier email notifications |
+| Terraform          | Reusable, low-ops maintenance |
+
+---
+
+## 🛠️ Future Roadmap
+
+- ✅ Multi-user authentication with Cognito
+- ✅ Per-user scan history
+- 🔄 Role-based dashboards (Admin/User)
+- 🧠 AI Model Integration to classify unknown food products
+- 📈 Nutrition dashboard and calorie tracking
+
+---
+
+## 🧰 Technologies Used
+
+**Backend:** Java Spring Boot  
+**Frontend:** HTML, CSS, JS, ZXing  
+**DevOps & IaC:** Terraform, GitHub Actions  
+**Cloud Services:** EKS, EC2, DynamoDB, S3, SNS, CloudWatch, Fluent Bit, NGINX  
+**Security:** TLS, Private Subnets, IAM (planned), Token Auth (planned)
+
+
+---
+
